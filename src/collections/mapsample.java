@@ -29,6 +29,7 @@ public class mapsample {
 		tm1.put(4,"shruthi");
 		tm1.put(5,"sri");
 		tm.putAll(tm1);
+		tm.putAll(tm1);
 		for(Map.Entry m:tm1.entrySet())
 		{
 			System.out.println(m.getKey()+ " "+m.getValue());
