@@ -13,7 +13,7 @@ public class Main {
 		qs.queue1();
 		mapsample S=new mapsample();
 		S.map1();
-		int arr[] = { 1, 2, 3, 5, 6, 5};
+		int arr[] = { 1, 2, 3, 5, 6, 5, 6, 5};
 		S.hashmap1(arr);
 
 		System.out.println(" ");
