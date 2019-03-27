@@ -1,0 +1,281 @@
+employee ts:
+  
+  import { Component, OnInit } from '@angular/core';
+import {EmployeeService} from '../shared/employee.service';
+import {NgForm} from '@angular/forms';
+import {Http,Headers,Response,RequestOptions,RequestMethod} from '@angular/http';
+import {Observable} from 'rxjs/observable';
+import {ToastrService} from 'ngx-toastr';
+
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise';
+import { Employee } from '../shared/employee.model';
+
+
+@Component({
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css'],
+ 
+})
+export class EmployeeComponent implements OnInit {
+
+  constructor(private employeeService:EmployeeService, private toastr:ToastrService) { }
+
+  ngOnInit() {
+    this.resetForm();
+  }
+
+  resetForm(form? : NgForm) {
+
+    if(form != null)
+      form.reset();
+    this.employeeService.selecetedEmployee =
+     {
+      EmployeeID:null,
+      FirstName:'',
+      LastName:'',
+      Position:'',
+      EmpCode:'',
+      Office:''
+    }
+  }
+                                   
+  onSubmit(form : NgForm) {
+
+    if(form.value.EmployeeID ==null) {
+  //  this.employeeService.postEmployee(form.value)
+  //  .subscribe (data => {
+ //     this.resetForm(form);
+       // this.employeeService.getEmployeeList();
+  //    this.toastr.success('Employee Registered Sucessfully ', 'Employee Register');
+  //  })
+    var newEmployee : Employee = 
+{    
+    EmployeeID: Math.floor(Math.random() * 6) + 1 , 
+    FirstName: form.value.FirstName, 
+    LastName: form.value.LastName, 
+    EmpCode: form.value.EmpCode,
+    Position:form.value.Position,
+    Office:form.value.Office
+  }
+    this.resetForm(form);
+    this.employeeService.employeeList.push(newEmployee);
+  
+    this.toastr.success('Sucessfully registered', 'Employee Register');
+    } 
+    else 
+    {
+      //  this.employeeService.putEmployee(form.value.EmployeeID,form.value)
+  //  .subscribe (data => {
+ //     this.resetForm(form);
+       // this.employeeService.getEmployeeList();
+  //    this.toastr.success('Employee Updated Sucessfully', 'Employee Register');
+  //  })
+  
+      for(var i=0;i<this.employeeService.employeeList.length;i++){
+        var emp: Employee = this.employeeService.employeeList[i];
+       
+        if(emp.EmployeeID == form.value.EmployeeID) {
+          emp.EmployeeID = form.value.EmployeeID;
+          emp.FirstName = form.value.FirstName
+          emp.LastName = form.value.LastName
+          emp.EmpCode = form.value.EmpCode;
+          emp.Position = form.value.Position;
+          emp.Office = form.value.Office;
+            break;
+        }
+
+      }
+      this.resetForm(form);
+      this.toastr.info('Employee Updated Sucessfully', 'Employee Register');
+    }
+ 
+  }
+ 
+}
+
+
+
+employee html:
+<form  class="emp-form"  
+  #employeeForm="ngForm" (ngSubmit)="onSubmit(employeeForm)">
+    <input  type="hidden" name="EmployeeID" #EmployeeID="ngModel" [(ngModel)]="employeeService.selecetedEmployee.EmployeeID">
+<div class="form-row">
+  <div class="form-group col-md-6">
+    <input  class="form-control" name="FirstName" #FirstName="ngModel" [(ngModel)]="employeeService.selecetedEmployee.FirstName" placeholder="First Name" required>
+    <div class="validation-error" *ngIf="FirstName.invalid && FirstName.touched">The FirstName is Required</div>
+  </div>
+  <div class="form-group col-md-6">
+    <input  class="form-control" name="LastName" #LastName="ngModel" [(ngModel)]="employeeService.selecetedEmployee.LastName" placeholder="Last Name" required>
+    <div class="validation-error" *ngIf="LastName.invalid && LastName.touched">The LastName is Required</div>
+  </div>
+</div>
+<div class="form-group">
+  <input  class="form-control" name="Position" #Position="ngModel" [(ngModel)]="employeeService.selecetedEmployee.Position" placeholder="Position">
+</div>
+<div class="form-row">
+  <div class="form-group col-md-6">
+    <input  class="form-control" name="EmpCode" #EmpCode="ngModel" [(ngModel)]="employeeService.selecetedEmployee.EmpCode" placeholder="Emp Code">
+  </div>
+  <div class="form-group col-md-6">
+    <input  class="form-control" name="Office" #Office="ngModel" [(ngModel)]="employeeService.selecetedEmployee.Office" placeholder="Office">
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="form-group col-md-8">
+    <button [disabled] = "!employeeForm.valid" type="submit" class="btn btn-lg btn-block btn-info"><i class="fa fa-floppy-o"></i>Submit</button>
+  </div>
+  <div class="form-group col-md-4">
+    <button type="button" class="btn btn-lg btn-block btn-secondary" (click)="resetForm(employeeForm)"><i class="fa fa-repeat"></i>Reset</button>
+  </div>
+</div>
+</form>
+
+
+
+employee-list .ts:
+import { Component, OnInit } from '@angular/core';
+import {EmployeeService} from '../shared/employee.service';
+import {Employee} from '../shared/employee.model';
+import {ToastrService} from 'ngx-toastr';
+
+@Component({
+  selector: 'app-employee-list',
+  templateUrl: './employee-list.component.html',
+  styleUrls: ['./employee-list.component.css']
+})
+export class EmployeeListComponent implements OnInit {
+
+  constructor(private employeeService:EmployeeService, private toastr:ToastrService) { }
+
+  ngOnInit() {
+   // this.employeeService.getEmployeeList();
+  }
+
+  showForEdit(from: Employee) {
+    this.employeeService.selecetedEmployee = Object.assign({},from);
+  }
+
+  onDelete(id) {
+
+    if(confirm('Are you sure to delete the record?')==true) {
+     // this.employeeService.deleteEmployee(id)
+     // .subscribe(x =>{
+     //   this.employeeService.getEmployeeList();
+      //  this.toastr.warning('Deleted Successfully');
+      //})
+      for(var i=0;i<this.employeeService.employeeList.length;i++){
+        var emp: Employee = this.employeeService.employeeList[i];
+        
+        if(emp.EmployeeID == id) {
+          this.employeeService.employeeList.splice(i,1);
+            break;
+        }
+
+      }
+    }
+  }
+
+}
+
+
+
+employeelist html:
+
+<table class="table table-sm table-striped table-bordered">
+  <tr *ngFor="let employee of employeeService.employeeList">
+    <td>{{employee.FirstName}} - {{employee.LastName}}</td>
+    <td>{{employee.EmpCode}}</td>
+    <td>
+      <a class="btn" (click)="showForEdit(employee)">
+        <i class="fa fa-pencil-square-o"></i>
+      </a>
+      <a class="btn text-danger" (click)="onDelete(employee.EmployeeID)">
+        <i class="fa fa-trash-o"></i>
+      </a>
+    </td>
+  </tr>
+</table>
+
+
+
+
+
+employee model
+export class Employee {
+    EmployeeID:number;
+    FirstName:string;
+    LastName:string;
+    EmpCode:string;
+    Position:string;
+    Office:string;
+
+}
+
+
+
+employee service
+
+import { Injectable } from '@angular/core';
+
+import {Employee} from './employee.model';
+import { Http,RequestOptions, RequestMethod,Response,Headers } from '@angular/http';
+import {Observable} from 'rxjs/observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
+
+  selecetedEmployee:Employee;
+ // employeeList : Employee[];
+
+ employeeList : Employee[] = [{EmployeeID: 1, FirstName: 'Rajesh', LastName: 'Kesavan', EmpCode: '0041',Position:'SPL',Office:'Sysveda'},
+  {EmployeeID: 2, FirstName: 'Elago', LastName: 'KS', EmpCode: '123',Position:'123',Office:'Sysveda'},
+  {EmployeeID: 3, FirstName: 'Arul', LastName: 'Pandian', EmpCode: '4323',Position:'4323',Office:'Sysveda'},
+  {EmployeeID: 4, FirstName: 'Dhiraj', LastName: 'Ray', EmpCode: '4321',Position:'4321',Office:'Sysveda'},
+];
+
+
+
+
+
+  //constructor(private http : Http) { }
+
+ /** postEmployee(form : Employee) {
+   var body = JSON.stringify(form);
+    var hoptions = new Headers({'Content-Type':'application/json'});
+    var requestOption = new RequestOptions({method : RequestMethod.Post,headers : hoptions});
+   return this.http.post('../Store',body,requestOption).map(x => x.json());
+  }*/
+
+  getEmployeeList() {
+    
+  //  this.getEmployeeList.bind( data =>{fakeUsers});
+    ////Orginal Code
+  //  this.http.get('.getLiet')
+   // .map((data : Response) => {
+   //   return data.json() as Employee[];
+  //  }).toPromise.bind(x =>{
+  //    this.employeeList = x;
+   // })
+ ////Orginal Code
+
+  }
+
+ /**  putEmployee(id,emp) {
+    var body = JSON.stringify(emp);
+    var hoptions = new Headers({'Content-Type':'application/json'});
+    var requestOption = new RequestOptions({method : RequestMethod.Put,headers : hoptions});
+    return this.http.post('../update'+id,body,requestOption).map(x => x.json());
+  }
+
+  deleteEmployee(id) {
+    return this.http.delete('../delete'+id).map (data=> data.json());
+  }*/
+
+}
